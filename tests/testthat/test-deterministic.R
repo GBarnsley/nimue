@@ -27,7 +27,7 @@ test_that("compare deterministic vaccine model to SEEIR model", {
     hosp_bed_capacity = 100000,
     ICU_bed_capacity = 1000000,
     dur_R = Inf,
-    max_vaccine = 0,
+    first_doses = 0,
     seed = 1,
     replicates = 1,
     seeding_cases = 20,
@@ -57,7 +57,7 @@ test_that("compare deterministic vaccine model to SEEIR model", {
   }
 
   # Check all vaccine-related compartments are 0
-  expect_equal(sum(m2$output[,unlist(oi2[c("vaccinated", "priorvaccinated", "vaccines")]),]), 0)
+  expect_equal(sum(m2$output[,unlist(oi2[c("vaccinated_first_dose", "vaccinated_second_dose", "vaccines", "vaccinated_waned")]),]), 0)
 
   # Check population size is constant at specified level
   expect_equal(format(m2, "N", NULL)$value,
@@ -77,7 +77,7 @@ test_that("Vaccine on works", {
     hosp_bed_capacity = 100000,
     ICU_bed_capacity = 1000000,
     dur_R = Inf,
-    max_vaccine = 10000,
+    first_doses = 10000,
     seed = 1,
     replicates = 1,
     time_period = 100,
@@ -85,8 +85,9 @@ test_that("Vaccine on works", {
   )
 
   # Check individuals reaching V
-  expect_gt(sum(format(m1, "vaccinated", NULL)$value), 0)
-  expect_gt(sum(format(m1, "priorvaccinated", NULL)$value), 0)
+  expect_gt(sum(format(m1, "vaccinated_first_dose", NULL)$value), 0)
+  expect_gt(sum(format(m1, "vaccinated_second_dose", NULL)$value), 0)
+  expect_gt(sum(format(m1, "vaccinated_waned", NULL)$value), 0)
 
   # Check population size is constant at specified level
   expect_equal(format(m1, "N", NULL)$value,
@@ -100,45 +101,74 @@ test_that("Vaccine on works", {
     hosp_bed_capacity = 100000,
     ICU_bed_capacity = 1000000,
     dur_R = Inf,
-    max_vaccine = 10000,
+    first_doses = 10000,
     seed = 1,
     replicates = 1,
     time_period = 100,
     seeding_cases = 20,
-    dur_V = Inf
+    dur_V = c(Inf, Inf, Inf)
   )
 
   # Check individuals reaching V
-  expect_gt(sum(format(m2, "vaccinated", NULL)$value), 0)
+  expect_gt(sum(format(m2, "vaccinated_first_dose", NULL)$value), 0)
+  expect_gt(sum(format(m2, "vaccinated_second_dose", NULL)$value), 0)
   # But not leaving v
-  expect_equal(sum(format(m2, "priorvaccinated", NULL)$value), 0)
+  expect_equal(sum(format(m2, "vaccinated_waned", NULL)$value), 0)
 
   # Check population size is constant at specified level
   expect_equal(format(m2, "N", NULL)$value,
                rep(sum(pop$n), 100))
 
-  # Vaccine model 100% efficacy against infection (infinite vaccine delay)
-  m3 <- run(
+  # Vaccine model 100% efficacy against infection (no second doses)
+  m_3 <- run(
     population = pop$n,
     contact_matrix_set = mm,
     hosp_bed_capacity = 100000,
     ICU_bed_capacity = 1000000,
     dur_R = Inf,
-    max_vaccine = 10000,
+    first_doses = 10000,
+    second_doses = 0,
     seed = 1,
     replicates = 1,
     time_period = 100,
-    seeding_cases = 20,
-    dur_vaccine_delay  = Inf
+    seeding_cases = 20
   )
-  S_index <- odin_index(m3$model)$S
 
-  # Unvaccainted S
-  expect_gt(sum(m3$output[,S_index[,1],1]), 0)
-  # Vaccinated not protected S
-  expect_gt(sum(m3$output[,S_index[,2:3],1]), 0)
-  # Vaccinated and protected S
-  expect_equal(sum(m3$output[,S_index[,4:6],1]), 0)
+  # Check individuals reaching V
+  expect_gt(sum(format(m_3, "vaccinated_first_dose", NULL)$value), 0)
+  #but no second
+  expect_equal(sum(format(m_3, "vaccinated_second_dose", NULL)$value), 0)
+  # and not leaving v
+  expect_equal(sum(format(m_3, "vaccinated_waned", NULL)$value), 0)
+
+  # Check population size is constant at specified level
+  expect_equal(format(m_3, "N", NULL)$value,
+               rep(sum(pop$n), 100))
+
+  # Vaccine model 100% efficacy against infection (no boosters)
+  m_4 <- run(
+    population = pop$n,
+    contact_matrix_set = mm,
+    hosp_bed_capacity = 100000,
+    ICU_bed_capacity = 1000000,
+    dur_R = Inf,
+    first_doses = 10000,
+    booster_doses = 0,
+    seed = 1,
+    replicates = 1,
+    time_period = 100,
+    seeding_cases = 20
+  )
+
+  # Check individuals reaching V
+  expect_gt(sum(format(m_4, "vaccinated_first_dose", NULL)$value), 0)
+  expect_gt(sum(format(m_4, "vaccinated_second_dose", NULL)$value), 0)
+  # and less waned that in baseline
+  expect_gt(sum(format(m_4, "vaccinated_waned", NULL)$value), sum(format(m1, "vaccinated_waned", NULL)$value))
+
+  # Check population size is constant at specified level
+  expect_equal(format(m_4, "N", NULL)$value,
+               rep(sum(pop$n), 100))
 })
 
 test_that("Time-varying works", {
@@ -152,8 +182,11 @@ test_that("Time-varying works", {
     hosp_bed_capacity = 100000,
     ICU_bed_capacity = 1000000,
     dur_R = Inf,
-    max_vaccine = c(0, 1000, 0),
-    tt_vaccine = c(0, 10, 20),
+    first_doses = c(0, 1000, 0),
+    tt_first_doses = c(0, 10, 20),
+    second_doses = c(0, 1000, 0),
+    tt_second_doses = c(0, 20, 30),
+    booster_doses = 0,
     seed = 1,
     replicates = 1,
     seeding_cases = 20,
@@ -163,8 +196,8 @@ test_that("Time-varying works", {
   # Check individuals in youngest age group reaching V
   t_v <- format(m1, NULL, "vaccines")
   expect_equal(sum(dplyr::filter(t_v, t < 10)$value, na.rm = TRUE), 0)
-  expect_gt(sum(dplyr::filter(t_v, t >= 10, t <20)$value, na.rm = TRUE), 0)
-  expect_equal(sum(dplyr::filter(t_v, t > 21)$value, na.rm = TRUE), 0)
+  expect_gt(sum(dplyr::filter(t_v, t >= 10, t <30)$value, na.rm = TRUE), 0)
+  expect_equal(sum(dplyr::filter(t_v, t > 31)$value, na.rm = TRUE), 0)
 })
 
 test_that("Efficacy against infection works", {
@@ -194,9 +227,9 @@ test_that("Efficacy against infection works", {
     replicates = 1,
     seeding_cases = 20,
     time_period = 100,
-    max_vaccine = 10000,
-    vaccine_efficacy_infection = rep(0.5, 17),
-    vaccine_efficacy_disease = rep(0, 17)
+    first_doses = 10000,
+    vaccine_efficacy_infection = rep(0.5, 4),
+    vaccine_efficacy_disease = rep(0, 4)
   )
   # Vaccine 100% efficacy against infection
   m3 <- run(
@@ -209,9 +242,9 @@ test_that("Efficacy against infection works", {
     replicates = 1,
     seeding_cases = 20,
     time_period = 100,
-    max_vaccine = 10000,
-    vaccine_efficacy_infection = rep(1, 17),
-    vaccine_efficacy_disease = rep(0, 17)
+    first_doses = 10000,
+    vaccine_efficacy_infection = rep(1, 4),
+    vaccine_efficacy_disease = rep(0, 4)
   )
 
   i1 <- sum(format(m1, NULL, "infections")$value, na.rm = TRUE)
@@ -249,9 +282,9 @@ test_that("Efficacy against disease works", {
     replicates = 1,
     seeding_cases = 20,
     time_period = 100,
-    max_vaccine = 10000,
-    vaccine_efficacy_disease = rep(0.5, 17),
-    vaccine_efficacy_infection = rep(0, 17)
+    first_doses = 10000,
+    vaccine_efficacy_disease = rep(0.5, 4),
+    vaccine_efficacy_infection = rep(0, 4)
   )
   # Vaccine 100% efficacy against disease
   m3 <- run(
@@ -264,9 +297,9 @@ test_that("Efficacy against disease works", {
     replicates = 1,
     seeding_cases = 20,
     time_period = 100,
-    max_vaccine = 10000,
-    vaccine_efficacy_disease = rep(1, 17),
-    vaccine_efficacy_infection = rep(0, 17)
+    first_doses = 10000,
+    vaccine_efficacy_disease = rep(1, 4),
+    vaccine_efficacy_infection = rep(0, 4)
   )
 
   i1 <- sum(format(m1, NULL, "deaths")$value, na.rm = TRUE)
@@ -279,14 +312,14 @@ test_that("Efficacy against disease works", {
 
 
 test_that("Efficacy parameterisation options work", {
-  run1 <- run(country = "France", max_vaccine = 5000000, vaccine_efficacy_infection = rep(0.9, 17), seed = 1)
-  run2 <- run(country = "France", max_vaccine = 5000000, vaccine_efficacy_infection = 0.9, seed = 1)
+  run1 <- run(country = "France", first_doses = 5000000, vaccine_efficacy_infection = rep(0.9, 4), seed = 1)
+  run2 <- run(country = "France", first_doses = 5000000, vaccine_efficacy_infection = matrix(0.9, nrow = 4, ncol = 17), seed = 1)
   expect_identical(run1$output, run2$output)
 
-  run3 <- run(country = "France", max_vaccine = 5000000, vaccine_efficacy_disease = rep(0.9, 17), seed = 1)
-  run4 <- run(country = "France", max_vaccine = 5000000, vaccine_efficacy_disease = 0.9, seed = 1)
+  run3 <- run(country = "France", first_doses = 5000000, vaccine_efficacy_disease = rep(0.9, 4), seed = 1)
+  run4 <- run(country = "France", first_doses = 5000000, vaccine_efficacy_disease = matrix(0.9, nrow = 4, ncol = 17), seed = 1)
   expect_identical(run3$output, run4$output)
 
-  expect_error(run(country = "France", vaccine_efficacy_infection = rep(0.9, 2)), "Parameter vaccine_efficacy_infection must be length 1 or length 17")
-  expect_error(run(country = "France", vaccine_efficacy_disease = rep(0.9, 2)), "Parameter vaccine_efficacy_disease must be length 1 or length 17")
+  expect_error(run(country = "France", vaccine_efficacy_infection = rep(0.9, 2)), "If element of vaccine_efficacy_infection is a vector, it must have 4 values corresponding to first dose, second dose, and the two waning levels")
+  expect_error(run(country = "France", vaccine_efficacy_disease = rep(0.9, 2)), "If element of vaccine_efficacy_disease is a vector, it must have 4 values corresponding to first dose, second dose, and the two waning levels")
 })

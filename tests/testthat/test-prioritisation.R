@@ -7,33 +7,33 @@ test_that("Tracking of proportion who have recieved vaccine works", {
   expect_error(strategy_matrix("wrong"), "Strategy must be one of: All, Elderly, Working Elderly Children, Risk Elderly Working Children,
          Risk Elderly Working Children step")
   # Run with no vaccine
-  r0 <- run("Angola", max_vaccine = 0, time_period = 50)
+  r0 <- run("Angola", first_doses = 0, time_period = 50)
   # Run with small amount of vaccine
-  r1 <- run("Angola", max_vaccine = 100, time_period = 50)
+  r1 <- run("Angola", first_doses = 100, time_period = 50)
   # Run with large amount of vaccine
-  r2 <- run("Angola", max_vaccine = 10e6, time_period = 50)
+  r2 <- run("Angola", first_doses = 10e6, time_period = 50)
   # Run with age targeting
-  r3 <- run("Angola", max_vaccine = 10e6, time_period = 50,
-            vaccine_coverage_mat = c(1, rep(0, 15), 1))
+  r3 <- run("Angola", first_doses = 10e6, time_period = 50,
+            vaccine_coverage_mat = c(1, rep(0, 15), 1) * 0.99)
   # Run with "All" strategy
   m1 <- strategy_matrix("All")
-  r4 <- run("Angola", max_vaccine = 10e6, time_period = 50,
+  r4 <- run("Angola", first_doses = 10e6, time_period = 50,
             vaccine_coverage_mat = m1)
   # Run with "Elderly" strategy
   m2 <- strategy_matrix("Elderly")
-  r5 <- run("Angola", max_vaccine = 10e6, time_period = 50,
+  r5 <- run("Angola", first_doses = 10e6, time_period = 50,
             vaccine_coverage_mat = m2)
   # Run with "Working Elderly Children" strategy
   m3 <- strategy_matrix("Working Elderly Children")
-  r6 <- run("Angola", max_vaccine = 1e6, time_period = 50,
+  r6 <- run("Angola", first_doses = 1e6, time_period = 50,
             vaccine_coverage_mat = m3)
   # Run with "Risk Elderly Working Children" strategy
   m4 <- strategy_matrix("Risk Elderly Working Children", risk_proportion = 0.3)
-  r7 <- run("Angola", max_vaccine = 1e6, time_period = 50,
+  r7 <- run("Angola", first_doses = 1e6, time_period = 50,
             vaccine_coverage_mat = m4)
   # Run with "Risk Elderly Working Children stepped" strategy
   m5 <- strategy_matrix("Risk Elderly Working Children step", risk_proportion = 0.3)
-  r8 <- run("Angola", max_vaccine = 1e6, time_period = 50,
+  r8 <- run("Angola", first_doses = 1e6, time_period = 50,
             vaccine_coverage_mat = m5)
 
   expect_is(m1, "matrix")
@@ -44,9 +44,9 @@ test_that("Tracking of proportion who have recieved vaccine works", {
 
   # Extract the proportion vaccinated (by age)
   get_pv <- function(x){
-    format(x, compartments = c(), summaries = c("N", "unvaccinated"), reduce_age = FALSE) %>%
+    format(x, compartments = c("D"), summaries = c("N", "unvaccinated"), reduce_age = FALSE) %>%
       pivot_wider(id_cols = c(t, replicate, age_group), values_from = value, names_from = compartment) %>%
-      mutate(prop_vaccinated = 1 - unvaccinated / N)
+      mutate(prop_vaccinated = 1 - unvaccinated / (N - D))
   }
 
   p0 <- get_pv(r0)

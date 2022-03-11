@@ -108,7 +108,7 @@ efficacious (95%), infection blocking vaccine that is distributed very
 quickly (500,000 individuals per day), and compare the results:
 
 ``` r
-run2 <- run(country = "France", max_vaccine = 500000, vaccine_efficacy_infection = rep(0.95, 17))
+run2 <- run(country = "France", first_doses = 500000, vaccine_efficacy_infection = rep(0.95, 17))
 output2 <- format(run2, summaries = "infections", compartments = NULL) %>%
   mutate(Run = "Efficacious vaccine")
 

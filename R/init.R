@@ -15,7 +15,7 @@ init <- function(population, seeding_cases, seeding_age_order = NULL,
   assert_int(seeding_cases)
   age_group_indices <- c(8, 9, 10, 11) # age_group indices corresponding to middle-aged travellers
 
-  empty <- matrix(0, nrow = 17, ncol = 6)
+  empty <- matrix(0, nrow = 17, ncol = 5)
 
   # distribute seeds either based on middle aged travellers randomly or ordinally by seeding_age_order
   if(is.null(seeding_age_order)) {
@@ -29,9 +29,9 @@ init <- function(population, seeding_cases, seeding_age_order = NULL,
   }
 
   S = population - raw_seeding_cases
-  S_0 = matrix(c(S, rep(0, 17*5)), nrow = 17, ncol = 6)
+  S_0 = matrix(c(S, rep(0, 17*4)), nrow = 17, ncol = 5)
   E1 = raw_seeding_cases
-  E1_0 = matrix(c(E1, rep(0, 17*5)), nrow = 17, ncol = 6)
+  E1_0 = matrix(c(E1, rep(0, 17*4)), nrow = 17, ncol = 5)
 
 
   if(!all((rowSums(S_0) + rowSums(E1_0)) == population)){

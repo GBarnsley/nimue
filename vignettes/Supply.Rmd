@@ -30,9 +30,9 @@ To begin, we can run the model with no supply constraints - in this case we imme
 # Run the with no vaccine supply constraint
 constant <- run(
   country = "United Kingdom",
-  max_vaccine = 100000,
-  vaccine_efficacy_disease = rep(0, 17),
-  vaccine_efficacy_infection = rep(0.9, 17)
+  first_doses = 100000,
+  vaccine_efficacy_disease = rep(0, 4),
+  vaccine_efficacy_infection = rep(0.9, 4)
 )
 # Format the output selecting vaccines and deaths
 o1 <- format(constant, compartments = NULL, summaries = c("deaths", "vaccines")) %>%
@@ -49,10 +49,10 @@ over a period of 100 days:
 # Run with initial vaccine supply constraints
 increasing <- run(
   country = "United Kingdom",
-  max_vaccine = seq(0, 100000, length.out = 100),
-  tt_vaccine = seq(0, 100, length.out = 100),
-  vaccine_efficacy_disease = rep(0, 17),
-  vaccine_efficacy_infection = rep(0.9, 17)
+  first_doses = seq(0, 100000, length.out = 100),
+  tt_first_doses = seq(0, 100, length.out = 100),
+  vaccine_efficacy_disease = rep(0, 4),
+  vaccine_efficacy_infection = rep(0.9, 4)
 )
 # Format the output selecting vaccines and deaths
 o2 <- format(increasing, compartments = NULL, summaries = c("deaths", "vaccines")) %>%

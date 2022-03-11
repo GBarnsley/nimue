@@ -47,7 +47,7 @@ plot.nimue_simulation <- function(x,
                 "hospitalisations",
                 "hospital_demand","hospital_occupancy",
                 "ICU_demand", "ICU_occupancy",
-                "vaccines", "unvaccinated", "vaccinated", "priorvaccinated",
+                "vaccines", "unvaccinated", "vaccinated_first_dose", "vaccinated_second_dose", "vaccinated_waned",
                 "infections", "deaths")
 
   comps <- var_select[var_select %in% compartments]

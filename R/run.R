@@ -95,17 +95,19 @@
 #' @param dur_R Mean duration of naturally acquired immunity (days). Can be
 #'   time varying, with timing of changes given by tt_dur_R.
 #' @param tt_dur_R Timing of changes in duration of natural immunity.
-#' @param dur_V Mean duration of vaccine-derived immunity (days)
+#' @param dur_V Mean duration of vaccine-derived immunity (days). Should be a 
+#'   numeric vector of length 2, corresponding to the duration of time in each waned compartmenet after recieving a second dose.
 #' @param vaccine_efficacy_infection Efficacy of vaccine against infection.
-#'   This parameter must either be length 1 numeric (a single efficacy for all
-#'   age groups) or length 17 numeric vector (an efficacy for each age group).
+#'   This parameter must either be a length 4 numeric (a single efficacy for
+#'   each vaccine state (first dose, second dose, and the two waned compartments))
+#'   or numeric vector with 17 columns and 4 rows
+#'   (an efficacy for each age group and vaccine state).
 #'   An efficacy of 1 will reduce FOI by 100 percent, an efficacy of 0.2 will
 #'   reduce FOI by 20 percent etc.
 #'   To specify changes in vaccine efficacy over time, vaccine efficacies must
 #'   be provided as a list, with each list element being the efficacy at each
 #'   time point specified by \code{tt_vaccine_efficacy_infection}. These
-#'   efficacies must also be length 1 numeric (a single efficacy for all age
-#'   groups)  or length 17 numeric vector (an efficacy for each age group)
+#'   efficacies must also be length 4 numeric or 4x17 numeric matrix.
 #' @param tt_vaccine_efficacy_infection Timing of changes in vaccine efficacy
 #'   against infection. Default = 0, which assumes fixed efficacy over time.
 #'   Must be the same length as the length of \code{vaccine_efficacy_infection}
@@ -113,23 +115,25 @@
 #'   changing vaccines being  given and dosing strategy changes.
 #' @param vaccine_efficacy_disease Efficacy of vaccine against severe
 #'   (requiring hospitilisation) disease (by age). This parameter must either be
-#'   length 1 numeric (a single efficacy for all age groups) or length 17
-#'   numeric vector (an efficacy for each age group). An efficacy of 1 will
+#'   length 4 numeric (a single efficacy for each vaccine state (first dose, second dose, and the two waned compartments)) or numeric vector with 17 columns and 4 rows
+#'   (an efficacy for each age group and vaccine state). An efficacy of 1 will
 #'   reduce the probability of hospitalisation by 100 percent, an efficacy of
 #'   0.2 will reduce the probability of hospitalisation by 20 percent etc.
 #'   To specify changes in vaccine efficacy over time, vaccine efficacies must
 #'   be provided as a list, with each list element being the efficacy at each
 #'   time point specified by \code{tt_vaccine_efficacy_disease}. These
-#'   efficacies must also be length 1 numeric (a single efficacy for all age
-#'   groups)  or length 17 numeric vector (an efficacy for each age group).
+#'   efficacies must also be length 4 numeric or 4x17 numeric matrix.
 #' @param tt_vaccine_efficacy_disease Timing of changes in vaccine efficacy
 #'   against disease. Default = 0, which assumes fixed efficacy over time.
 #'   Must be the same length as the length of \code{vaccine_efficacy_disease}
 #'   when provided as a list. Time changing efficacies can occur in response to
 #'   changing vaccines being  given and dosing strategy changes.
-#' @param max_vaccine The maximum number of individuals who can be vaccinated per day.
-#' @param tt_vaccine Time change points for vaccine capacity (\code{max_vaccine}).
-#' @param dur_vaccine_delay Mean duration of period from vaccination to vaccine protection.
+#' @param first_doses The maximum number of individuals who can be vaccinated with their first dose per day.
+#' @param tt_first_doses Time change points for vaccine capacity (\code{first_doses}).
+#' @param second_doses The maximum number of individuals who can be vaccinated with their second dose per day.
+#' @param tt_second_doses Time change points for vaccine capacity (\code{second_doses}).
+#' @param booster_doses The maximum number of individuals who can be vaccinated with their booster dose per day.
+#' @param tt_booster_doses Time change points for vaccine capacity (\code{booster_doses}).
 #' @param vaccine_coverage_mat Vaccine coverage targets by age (columns) and priority (row)
 #' @param use_dde Use the dde solver (default is \code{TRUE})
 #' @param ... Additional arguments for solver
@@ -202,9 +206,12 @@ run <- function(
   tt_vaccine_efficacy_infection = vaccine_pars$tt_vaccine_efficacy_infection,
   vaccine_efficacy_disease = vaccine_pars$vaccine_efficacy_disease,
   tt_vaccine_efficacy_disease = vaccine_pars$tt_vaccine_efficacy_disease,
-  max_vaccine = vaccine_pars$max_vaccine,
-  tt_vaccine = vaccine_pars$tt_vaccine,
-  dur_vaccine_delay = vaccine_pars$dur_vaccine_delay,
+  first_doses = vaccine_pars$first_doses,
+  tt_first_doses = vaccine_pars$tt_first_doses,
+  second_doses = vaccine_pars$second_doses,
+  tt_second_doses = vaccine_pars$tt_second_doses,
+  booster_doses = vaccine_pars$booster_doses,
+  tt_booster_doses = vaccine_pars$tt_booster_doses,
   vaccine_coverage_mat = vaccine_pars$vaccine_coverage_mat,
 
   # health system capacity
@@ -227,7 +234,7 @@ run <- function(
   # create parameter list
   pars <- parameters(country = country,
                      population = population,
-                     tt_contact_matrix = tt_contact_matrix ,
+                     tt_contact_matrix = tt_contact_matrix,
                      contact_matrix_set = contact_matrix_set,
                      R0 = R0,
                      tt_R0 = tt_R0 ,
@@ -275,9 +282,12 @@ run <- function(
                      tt_vaccine_efficacy_infection = tt_vaccine_efficacy_infection,
                      vaccine_efficacy_disease = vaccine_efficacy_disease,
                      tt_vaccine_efficacy_disease = tt_vaccine_efficacy_disease,
-                     max_vaccine = max_vaccine,
-                     tt_vaccine = tt_vaccine,
-                     dur_vaccine_delay = dur_vaccine_delay,
+                     first_doses = first_doses,
+                     tt_first_doses = tt_first_doses,
+                     second_doses = second_doses,
+                     tt_second_doses = tt_second_doses,
+                     booster_doses = booster_doses,
+                     tt_booster_doses = tt_booster_doses,
                      vaccine_coverage_mat = vaccine_coverage_mat,
                      init = init)
 

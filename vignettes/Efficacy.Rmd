@@ -29,7 +29,7 @@ First, let's start with a counterfactual run with no vaccination:
 ```{r, echo = TRUE}
 # Run the model with an example population and no vaccination
 no_vaccine <- run(country = "United Kingdom", 
-                  max_vaccine = 0)
+                  first_doses = 0)
 # Format the output selecting infection and deaths
 out1 <- format(no_vaccine, compartments = NULL, summaries = c("infections", "deaths")) %>%
   mutate(Name = "No vaccine")
@@ -43,9 +43,9 @@ Next, we can run with an infection-blocking vaccine:
 ```{r, echo = TRUE}
 # Run the determinstic model with an example population and infection-blocking vaccine
 infection_blocking <- run(country = "United Kingdom",  
-                          max_vaccine = 200000,
-                          vaccine_efficacy_disease = rep(0, 17),
-                          vaccine_efficacy_infection = rep(0.9, 17))
+                          first_doses = 200000,
+                          vaccine_efficacy_disease = rep(0, 4),
+                          vaccine_efficacy_infection = rep(0.9, 4))
 # Format the output selecting infection and deaths
 out2 <- format(infection_blocking, compartments = NULL, summaries = c("infections", "deaths")) %>%
   mutate(Name = "Infection blocking")
@@ -58,9 +58,9 @@ And finally, a run with a disease-blocking vaccine:
 ```{r, echo = TRUE}
 # Run the determinstic model with an example population and anti-disease vaccine
 disease_blocking <- run(country = "United Kingdom",  
-                          max_vaccine = 200000,
-                          vaccine_efficacy_disease = rep(0.9, 17),
-                          vaccine_efficacy_infection = rep(0, 17))
+                          first_doses = 200000,
+                          vaccine_efficacy_disease = rep(0.9, 4),
+                          vaccine_efficacy_infection = rep(0, 4))
 # Format the output selecting infection and deaths
 out3 <- format(disease_blocking, compartments = NULL, summaries = c("infections", "deaths")) %>%
   mutate(Name = "Disease  blocking")

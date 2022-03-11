@@ -52,9 +52,12 @@ parameters(
   tt_vaccine_efficacy_infection,
   vaccine_efficacy_disease,
   tt_vaccine_efficacy_disease,
-  max_vaccine,
-  tt_vaccine,
-  dur_vaccine_delay,
+  first_doses,
+  tt_first_doses,
+  second_doses,
+  tt_second_doses,
+  booster_doses,
+  tt_booster_doses,
   vaccine_coverage_mat,
   hosp_bed_capacity,
   ICU_bed_capacity,
@@ -193,18 +196,20 @@ time varying, with timing of changes given by tt_dur_R.}
 
 \item{tt_dur_R}{Timing of changes in duration of natural immunity.}
 
-\item{dur_V}{Mean duration of vaccine-derived immunity (days)}
+\item{dur_V}{Mean duration of vaccine-derived immunity (days). Should be a 
+numeric vector of length 2, corresponding to the duration of time in each waned compartmenet after recieving a second dose.}
 
 \item{vaccine_efficacy_infection}{Efficacy of vaccine against infection.
-This parameter must either be length 1 numeric (a single efficacy for all
-age groups) or length 17 numeric vector (an efficacy for each age group).
+This parameter must either be a length 4 numeric (a single efficacy for
+each vaccine state (first dose, second dose, and the two waned compartments))
+or numeric vector with 17 columns and 4 rows
+(an efficacy for each age group and vaccine state).
 An efficacy of 1 will reduce FOI by 100 percent, an efficacy of 0.2 will
 reduce FOI by 20 percent etc.
 To specify changes in vaccine efficacy over time, vaccine efficacies must
 be provided as a list, with each list element being the efficacy at each
 time point specified by \code{tt_vaccine_efficacy_infection}. These
-efficacies must also be length 1 numeric (a single efficacy for all age
-groups)  or length 17 numeric vector (an efficacy for each age group)}
+efficacies must also be length 4 numeric or 4x17 numeric matrix.}
 
 \item{tt_vaccine_efficacy_infection}{Timing of changes in vaccine efficacy
 against infection. Default = 0, which assumes fixed efficacy over time.
@@ -214,15 +219,14 @@ changing vaccines being  given and dosing strategy changes.}
 
 \item{vaccine_efficacy_disease}{Efficacy of vaccine against severe
 (requiring hospitilisation) disease (by age). This parameter must either be
-length 1 numeric (a single efficacy for all age groups) or length 17
-numeric vector (an efficacy for each age group). An efficacy of 1 will
+length 4 numeric (a single efficacy for each vaccine state (first dose, second dose, and the two waned compartments)) or numeric vector with 17 columns and 4 rows
+(an efficacy for each age group and vaccine state). An efficacy of 1 will
 reduce the probability of hospitalisation by 100 percent, an efficacy of
 0.2 will reduce the probability of hospitalisation by 20 percent etc.
 To specify changes in vaccine efficacy over time, vaccine efficacies must
 be provided as a list, with each list element being the efficacy at each
 time point specified by \code{tt_vaccine_efficacy_disease}. These
-efficacies must also be length 1 numeric (a single efficacy for all age
-groups)  or length 17 numeric vector (an efficacy for each age group).}
+efficacies must also be length 4 numeric or 4x17 numeric matrix.}
 
 \item{tt_vaccine_efficacy_disease}{Timing of changes in vaccine efficacy
 against disease. Default = 0, which assumes fixed efficacy over time.
@@ -230,11 +234,17 @@ Must be the same length as the length of \code{vaccine_efficacy_disease}
 when provided as a list. Time changing efficacies can occur in response to
 changing vaccines being  given and dosing strategy changes.}
 
-\item{max_vaccine}{The maximum number of individuals who can be vaccinated per day.}
+\item{first_doses}{The maximum number of individuals who can be vaccinated with their first dose per day.}
 
-\item{tt_vaccine}{Time change points for vaccine capacity (\code{max_vaccine}).}
+\item{tt_first_doses}{Time change points for vaccine capacity (\code{first_doses}).}
 
-\item{dur_vaccine_delay}{Mean duration of period from vaccination to vaccine protection.}
+\item{second_doses}{The maximum number of individuals who can be vaccinated with their second dose per day.}
+
+\item{tt_second_doses}{Time change points for vaccine capacity (\code{second_doses}).}
+
+\item{booster_doses}{The maximum number of individuals who can be vaccinated with their booster dose per day.}
+
+\item{tt_booster_doses}{Time change points for vaccine capacity (\code{booster_doses}).}
 
 \item{vaccine_coverage_mat}{Vaccine coverage targets by age (columns) and priority (row)}
 

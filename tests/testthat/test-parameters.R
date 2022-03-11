@@ -16,7 +16,7 @@ test_that("default parameter list works", {
   expect_named(v1, c("dur_R", "tt_dur_R", "dur_V",
                      "vaccine_efficacy_infection", "tt_vaccine_efficacy_infection",
                      "vaccine_efficacy_disease", "tt_vaccine_efficacy_disease",
-                     "max_vaccine", "tt_vaccine", "dur_vaccine_delay",
+                     "first_doses", "tt_first_doses", "second_doses", "tt_second_doses", "booster_doses", "tt_booster_doses",
                      "vaccine_coverage_mat"))
   dur1 <- default_durations()
   expect_type(dur1, "list")
@@ -80,7 +80,7 @@ test_that("seeding_age_order works", {
     hosp_bed_capacity = sum(pop$n),
     ICU_bed_capacity = sum(pop$n),
     dur_R = Inf,
-    max_vaccine = 0,
+    first_doses  = 0,
     seed = 1,
     replicates = 1,
     R0 = 2,
@@ -98,7 +98,7 @@ test_that("seeding_age_order works", {
     hosp_bed_capacity = sum(pop$n),
     ICU_bed_capacity = sum(pop$n),
     dur_R = Inf,
-    max_vaccine = 0,
+    first_doses = 0,
     seed = 1,
     replicates = 1,
     R0 = 2,
@@ -147,7 +147,7 @@ test_that("beta_est_infectiousness value return checks", {
     hosp_bed_capacity = sum(pop$n),
     ICU_bed_capacity = sum(pop$n),
     dur_R = Inf,
-    max_vaccine = 0,
+    first_doses = 0,
     seed = 1,
     replicates = 1,
     R0 = R0,
@@ -164,7 +164,7 @@ test_that("beta_est_infectiousness value return checks", {
     ICU_bed_capacity = sum(pop$n),
     dur_R = Inf,
     rel_infectiousness = c(rep(0.5,2), rep(1,15)),
-    max_vaccine = 0,
+    first_doses = 0,
     seed = 1,
     replicates = 1,
     R0 = R0,
@@ -217,19 +217,20 @@ test_that("correct lengths on time varying efficacies", {
   # check to see that it is being correctly interpolated in outputs
   r <- run("Iran",
            R0 = 1.5,
-           vaccine_efficacy_disease = list(rep(0,17),rep(1,17)),
+           vaccine_efficacy_disease = list(rep(0,4),rep(1,4)),
            tt_vaccine_efficacy_disease = c(0, 200),
-           vaccine_efficacy_infection = rep(0,17),
-           max_vaccine = c(1000000),
+           vaccine_efficacy_infection = rep(0,4),
+           first_doses = c(1000000),
            dur_V = Inf,
-           vaccine_coverage_mat = nimue::strategy_matrix("All", 1)
+           vaccine_coverage_mat = nimue::strategy_matrix("All", 1) * 0.99
   )
-
+  
   # if correct we should have deaths falling sharp the day after they have come in
   output <- format(r, summaries = c("deaths", "infections"))
   deaths <- output[output$compartment == "deaths",]
   expect_gt(deaths$value[deaths$t == 201], deaths$value[deaths$t == 200])
   expect_lt(deaths$value[deaths$t == 202], deaths$value[deaths$t == 201])
+  #NOTE THIS DOESN@T SEEM THAT SHARP
 
   # but infections should stay increasing
   infections <- output[output$compartment == "infections",]
@@ -239,13 +240,13 @@ test_that("correct lengths on time varying efficacies", {
   # but if we flip the profiles round
   r2 <- run("Iran",
             R0 = 1.5,
-            vaccine_efficacy_disease = list(rep(0,17),rep(0,17)),
+            vaccine_efficacy_disease = list(rep(0,4),rep(0,4)),
             tt_vaccine_efficacy_disease = c(0, 200),
-            vaccine_efficacy_infection = list(rep(0,17), rep(1,17)),
+            vaccine_efficacy_infection = list(rep(0,4), rep(1,4)),
             tt_vaccine_efficacy_infection = c(0, 200),
-            max_vaccine = c(1000000),
+            first_doses = c(1000000),
             dur_V = Inf,
-            vaccine_coverage_mat = nimue::strategy_matrix("All", 1)
+            vaccine_coverage_mat = nimue::strategy_matrix("All", 1) * 0.99
   )
 
   # with them flipped deaths will still keep increasing due to the delay till admission etc
@@ -266,9 +267,9 @@ test_that("correct lengths on time varying efficacies", {
 
 test_that("rel_infectiousness_vaccine works", {
 
-  r1 <- nimue::run("Iran", max_vaccine = 200000)
+  r1 <- nimue::run("Iran", first_doses = 200000)
   infs1 <- nimue::format(r1, summaries = "infections")
-  r2 <- nimue::run("Iran", max_vaccine = 200000, rel_infectiousness_vaccinated = 0.2)
+  r2 <- nimue::run("Iran", first_doses = 200000, rel_infectiousness_vaccinated = 0.2)
   infs2 <- nimue::format(r2, summaries = "infections")
 
   expect_gt(

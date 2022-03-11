@@ -8,8 +8,8 @@ format(
   x,
   compartments = c("S", "E", "IMild", "ICase", "IICU", "IHospital", "IRec", "R", "D"),
   summaries = c("N", "hospitalisations", "hospital_demand", "hospital_occupancy",
-    "ICU_demand", "ICU_occupancy", "vaccines", "unvaccinated", "vaccinated",
-    "priorvaccinated", "infections", "deaths"),
+    "ICU_demand", "ICU_occupancy", "vaccines", "unvaccinated", "vaccinated_first_dose",
+    "vaccinated_second_dose", "vaccinated_waned", "infections", "deaths"),
   reduce_age = TRUE,
   date_0 = NULL,
   replicate = 1
